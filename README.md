@@ -13,7 +13,7 @@ Please download the data [here](https://aa-trajectory-data.s3.us-east-2.amazonaw
 
 ## License
 
-This project is licensed under the [PolyForm Noncommercial License 1.0.0]. Please refer to [LICENSE](https://github.com/michigan-traffic-lab/Learning-Naturalistic-Driving-Environment/blob/main/LICENSE) for more details.
+This project is licensed under the [PolyForm Noncommercial License 1.0.0]. Please refer to [LICENSE](https://github.com/michigan-traffic-lab/Learning-Naturalistic-Driving-Environment/blob/master/LICENSE) for more details.
 
 ## Contact
 
