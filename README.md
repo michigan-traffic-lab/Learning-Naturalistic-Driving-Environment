@@ -5,7 +5,7 @@
 ## Introduction
 
 In this repository, we provide the Ann Arbor dataset that we used to train NeuralNDE.
-The data collected at the two-lane roundabout at the intersection of State St. and W. Ellsworth Rd. in Ann Arbor, Michigan.
+The data was collected at the two-lane roundabout at the intersection of State St. and W. Ellsworth Rd. in Ann Arbor, Michigan.
 
 ## Download
 
