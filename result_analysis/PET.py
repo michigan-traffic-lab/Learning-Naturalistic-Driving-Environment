@@ -27,6 +27,11 @@ def analyze_PET_res(res_folder, output_folder, density=True, gt_folder=None, sim
         except:
             pass
 
+    if len(output_PET_list) == 0:
+        print("============== No PET results found, check folder path and "
+              "whether gen_realistic_metric_flag is set to True in the config file"
+              "when running the simulation.")
+
     PET_list = []
     for tmp in output_PET_list:
         PET_list += tmp
@@ -98,13 +103,14 @@ def cal_KL_div(P, Q):
 
 
 if __name__ == '__main__':
-    # Ground-truth results
-    gt_folder = r'./raw_data/ground_truth/'
-
     # Simulation results
-    res_folder = r'./raw_data/NeuralNDE/'
-    output_folder = os.path.join('plot/PET')
+    experiment_name = 'AA_rdbt_paper_results'
+    res_folder = f'../data/paper-inference-results/{experiment_name}'
+    output_folder = os.path.join(f'plot/{experiment_name}/PET')
     os.makedirs(output_folder, exist_ok=True)
+
+    # Ground-truth results
+    gt_folder = r'../data/statistical-realism-ground-truth/AA_rdbt_ground_truth/'
 
     # Analyze the results and plot the figures
     analyze_PET_res(res_folder, output_folder, density=True, gt_folder=gt_folder, sim_resol=0.4, PET_threshold=4)

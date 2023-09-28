@@ -13,7 +13,7 @@ def analyze_collision_rate(res_folder, output_folder):
         try:
             res_df_list.append(pd.read_csv(data_path))
         except:
-            raise ValueError("No file: {0}".format(data_path))
+            pass
     res_df = pd.concat(res_df_list)
 
     total_sim_num = res_df['Sim number'].sum()
@@ -32,8 +32,9 @@ def analyze_collision_rate(res_folder, output_folder):
 
 if __name__ == '__main__':
     # Simulation results
-    res_folder = r'./raw_data/NeuralNDE/'
-    output_folder = os.path.join('plot/crash_rate')
+    experiment_name = 'AA_rdbt_paper_results'
+    res_folder = f'../data/paper-inference-results/{experiment_name}'
+    output_folder = os.path.join(f'plot/{experiment_name}/crash_rate')
     os.makedirs(output_folder, exist_ok=True)
 
     # Analyze the results

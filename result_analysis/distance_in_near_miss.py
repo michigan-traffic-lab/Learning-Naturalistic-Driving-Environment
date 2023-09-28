@@ -10,7 +10,7 @@ import bisect
 from scipy.stats import entropy
 
 
-def analyze_distance_res(res_folder, output_folder, dis_threshold=10.0, density=True, gt_folder=None, save_fig=False):
+def analyze_distance_in_near_miss_res(res_folder, output_folder, dis_threshold=10.0, density=True, gt_folder=None):
     if gt_folder is not None:
         gt_distance_list = []
         try:
@@ -29,6 +29,11 @@ def analyze_distance_res(res_folder, output_folder, dis_threshold=10.0, density=
                 output_distance_list += json.load(json_file)
         except:
             pass
+
+    if len(output_distance_list) == 0:
+        print("============== No distance results found, check folder path and "
+              "whether gen_realistic_metric_flag is set to True in the config file"
+              "when running the simulation.")
 
     distance_list = []
     for tmp in output_distance_list:
@@ -59,14 +64,11 @@ def analyze_distance_res(res_folder, output_folder, dis_threshold=10.0, density=
     data = pd.DataFrame({'bins': gt_bins[1:index+1], 'ground_truth_probability_density': gt_prob_density[:index], f'NeuralNDE_probability_density': sim_prob_density[:index]})
 
     # Save figure with x, y axis label and ticks
-    if save_fig:
-        output_folder_with_label = os.path.join(output_folder)
-        os.makedirs(output_folder_with_label, exist_ok=True)
-        file_name = 'distance_in_near_miss_distribution_Hdis{0}_KL{1}'.format("%.3f" % round(H_dist, 3), "%.3f" % round(KL_div, 3))
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.svg'), bbox_inches='tight')
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.pdf'), bbox_inches='tight')
-        data.to_csv(os.path.join(output_folder_with_label, file_name + '.csv'), sep=",", index=False)
+    file_name = 'distance_in_near_miss_distribution_Hdis{0}_KL{1}'.format("%.3f" % round(H_dist, 3), "%.3f" % round(KL_div, 3))
+    plt.savefig(os.path.join(output_folder, file_name + '.png'), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(output_folder, file_name + '.svg'), bbox_inches='tight')
+    plt.savefig(os.path.join(output_folder, file_name + '.pdf'), bbox_inches='tight')
+    data.to_csv(os.path.join(output_folder, file_name + '.csv'), sep=",", index=False)
 
 
 # Quantify the difference of the distribution
@@ -96,15 +98,14 @@ def cal_KL_div(P, Q):
 
 
 if __name__ == '__main__':
-    # Ground-truth results
-    gt_folder = r'./raw_data/ground_truth/'
-
     # Simulation results
-    res_folder = r'./raw_data/NeuralNDE/'
-    save_fig = True  # Whether save plotted figure
-    output_folder = os.path.join('plot/distance_in_near_miss')
-    if save_fig:
-        os.makedirs(output_folder, exist_ok=True)
+    experiment_name = 'AA_rdbt_paper_results'
+    res_folder = f'../data/paper-inference-results/{experiment_name}'
+    output_folder = os.path.join(f'plot/{experiment_name}/distance_in_near_miss')
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Ground-truth results
+    gt_folder = r'../data/statistical-realism-ground-truth/AA_rdbt_ground_truth/'
 
     # Analyze the results and plot the figures
-    analyze_distance_res(res_folder, output_folder, density=True, gt_folder=gt_folder, save_fig=save_fig, dis_threshold=10)
+    analyze_distance_in_near_miss_res(res_folder, output_folder, dis_threshold=10, density=True, gt_folder=gt_folder)

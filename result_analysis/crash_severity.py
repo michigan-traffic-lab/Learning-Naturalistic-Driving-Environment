@@ -5,12 +5,12 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import glob
 import pickle
 import copy
 from itertools import combinations
 import math
 from scipy.stats import entropy
+from pathlib import Path
 
 from crash_type import collision_check, collision_type_classification
 
@@ -74,7 +74,10 @@ def _cal_severity_and_type(collision_frame_path, onestep_b4_collision_frame_path
                 if v.id == vid:
                     v_obj_later = v
 
-            speed = _cal_v_speed(v_obj_before, v_obj_later, sim_resol=sim_resol)
+            try:
+                speed = _cal_v_speed(v_obj_before, v_obj_later, sim_resol=sim_resol)
+            except:
+                speed = 0.
             v_obj = copy.deepcopy(v_obj_later)
             v_obj.speed = speed
             v_obj.mass = 1  # mass of the vehicle. To calculate the crash severity using perfect inelastic crash (conservation of momentum)
@@ -126,9 +129,12 @@ def _cal_severity_and_type(collision_frame_path, onestep_b4_collision_frame_path
 
 def analyze_crash_severity(res_folder, output_folder):
 
-    traj_dirs = sorted(glob.glob(os.path.join(res_folder, '*/*/*.pickle')))
-    traj_dirs_df = pd.DataFrame(traj_dirs, columns=['path'])
-    traj_dirs_df['folder'] = traj_dirs_df["path"].apply(lambda x: x.split('\\')[-3])
+    res_folder = Path(res_folder)
+    traj_dirs = list(res_folder.glob('*/*/*.pickle'))
+    traj_dirs = sorted(traj_dirs)
+
+    traj_dirs_df = pd.DataFrame({'path': traj_dirs})
+    traj_dirs_df['folder'] = traj_dirs_df['path'].apply(lambda x: x.parts[-3])
     traj_dirs_df['episode_frame'] = traj_dirs_df["path"].apply(lambda x: os.path.splitext(os.path.basename(x))[0])
     traj_dirs_df["episode_id"] = (traj_dirs_df['episode_frame'].apply(lambda x: x.split('-')[0])).astype(int)
     traj_dirs_df["frame_id"] = (traj_dirs_df['episode_frame'].apply(lambda x: x.split('-')[1])).astype(int)
@@ -229,8 +235,9 @@ def cal_KL_div(P, Q):
 
 if __name__ == '__main__':
     # Simulation results
-    res_folder = r'./raw_data/NeuralNDE/'
-    output_folder = os.path.join('plot/crash_severity')
+    experiment_name = 'AA_rdbt_paper_results'
+    res_folder = f'../data/paper-inference-results/{experiment_name}'
+    output_folder = os.path.join(f'plot/{experiment_name}/crash_severity')
     os.makedirs(output_folder, exist_ok=True)
 
     # Analyze the results

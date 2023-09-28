@@ -5,11 +5,11 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import glob
 import pickle
 from shapely.geometry import Polygon, Point
 from itertools import combinations
 from scipy.stats import entropy
+from pathlib import Path
 
 
 def collision_check(vehicle_list, extra_buffer=False):
@@ -138,9 +138,12 @@ def analyze_collision_type_distribution(res_folder, output_folder, plot_collisio
 
     collision_type_num = {'rear_end': 0, 'angle': 0, 'sideswipe': 0, 'other': 0, 'more_than_two_vehicles': 0}
 
-    traj_dirs = sorted(glob.glob(os.path.join(res_folder, '*/*/*.pickle')))
-    traj_dirs_df = pd.DataFrame(traj_dirs, columns=['path'])
-    traj_dirs_df['folder'] = traj_dirs_df["path"].apply(lambda x: x.split('\\')[-3])
+    res_folder = Path(res_folder)
+    traj_dirs = list(res_folder.glob('*/*/*.pickle'))
+    traj_dirs = sorted(traj_dirs)
+
+    traj_dirs_df = pd.DataFrame({'path': traj_dirs})
+    traj_dirs_df['folder'] = traj_dirs_df['path'].apply(lambda x: x.parts[-3])
     traj_dirs_df['episode_frame'] = traj_dirs_df["path"].apply(lambda x: os.path.splitext(os.path.basename(x))[0])
     traj_dirs_df["episode_id"] = (traj_dirs_df['episode_frame'].apply(lambda x: x.split('-')[0])).astype(int)
     traj_dirs_df["frame_id"] = (traj_dirs_df['episode_frame'].apply(lambda x: x.split('-')[1])).astype(int)
@@ -234,8 +237,9 @@ def cal_KL_div(P, Q):
 
 if __name__ == '__main__':
     # Simulation results
-    res_folder = r'./raw_data/NeuralNDE/'
-    output_folder = os.path.join('plot/crash_type')
+    experiment_name = 'AA_rdbt_paper_results'
+    res_folder = f'../data/paper-inference-results/{experiment_name}'
+    output_folder = os.path.join(f'plot/{experiment_name}/crash_type')
     os.makedirs(output_folder, exist_ok=True)
 
     # Analyze the results

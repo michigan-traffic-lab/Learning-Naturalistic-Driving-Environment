@@ -114,6 +114,17 @@ dmypy.json
 .pyre/
 
 .idea
-/result_analysis/raw_data
-/result_analysis/plot
+/vis_training*
+*.pt
+logfile.json
+*.mp4
 *.zip
+/result_analysis/plot
+*.json
+*.png
+*.jpg
+*.psd
+*.npz
+# But not the requirement.txt files...
+/data
+/results

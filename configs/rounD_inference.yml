@@ -1,0 +1,82 @@
+#################### General settings ####################
+# Device settings
+use_gpu: False  # whether to use the gpu
+
+# Inference simulation settings
+sim_wall_time: 36  # unit: s. The simulation wall time. The simulation will stop if the wall time is reached.
+sim_num: 10  # Number of simulations to run.
+
+# Simulation metrics
+save_collision_data_flag: True  # Save crash data. This must set to True if want to analyze crash type and crash severity.
+gen_realistic_metric_flag: True  # Generate and save realistic metrics.
+gen_realistic_metric_dict:  # What metrics to generate.
+  PET: True  # Post-encroachment time.
+  instant_speed: True  # Vehicle instantaneous speed
+  yielding_speed_and_distance: True  # Each yielding moment calculate the yielding distance and speed with the conflicting vehicle.
+  distance: True  # Vehicle distance
+
+#################### Other settings ####################
+
+# NeuralNDE model
+# The parameters below are determined by your trained model
+model: "transformer"
+dataset: "rounD"
+history_length: 5  # number of historical steps input to the model
+pred_length: 5  # number of predicted steps output by the model
+m_tokens: 32  # maximum number of vehicles that can be handled by the model
+
+# Checkpoints of the trained models (behavior modeling net, safety mapping net, etc.)
+behavior_model_ckpt_dir: "data/inference/rounD/behavior_model_ckpt/rounD_behavior_net.pt"
+safety_mapper_ckpt_dir: "data/inference/rounD/safety_mapper_ckpt/safety_mapping_net.pt"
+
+# Whether use neural safety mapping module
+use_neural_safety_mapping: True
+
+# Whether use conflict critic module (crash critic module)
+use_conflict_critic_module: True
+
+# Other inference simulation settings
+sim_resol: 0.4  # simulation resolution. unit: s
+rolling_step: 1  # How many pred steps to execute during autoregression.
+interpolate_flag: False # Interpolate the trajectory to a finer time resolution for better visualization.
+intep_steps: 3  # Number of steps to inter between steps. E.g., resolution is 0.4s intep_steps=3 then new resolution is 0.1s
+
+# Simulation metrics dependencies
+ROI_map_dir: "data/inference/rounD/ROIs-map"  # Used for metric analysis.
+PET_configs: # This is pixel coordinates of the basemap image
+  width_start: 550
+  width_end: 1050
+  width_n: 20
+  width_res: 25.0
+  height_start: 230
+  height_end: 700
+  height_n: 20
+  height_res: 23.5
+
+# Other save results and visualization
+save_simulated_TIME_BUFF_flag: False  # Save all generated simulated trajectories
+viz_flag: False  # Whether visualize the simulation.
+save_viz_flag: False  # Save simulation visualizations
+save_fps: 10
+
+# Data needed for the simulation. E.g., map image, initial vehicle states, etc.
+basemap_dir: "data/inference/rounD/basemap/rounD-official-map.png"
+drivable_map_dir: &drivable_map_dir "data/inference/rounD/drivablemap/rounD-drivablemap.jpg"
+sim_remove_vehicle_area_map: "data/inference/rounD/ROIs-map/rounD-sim-remove-vehicle-area-map.jpg"  # E.g., exits.
+entrance_map_dir: &entrance_map_dir "data/inference/rounD/ROIs-map/entrance"  # Only needed if want to use lane_based_safety_check for initialization.
+map_height: &map_height 936  # The map height and width ratio should be consistent with the basemap and drivable map pictures.
+map_width: &map_width 1678
+init_traj_clips_dir: "data/inference/rounD/simulation_initialization/initial_clips/"  # For initialization.
+traffic_generator_config:
+  method: Poisson  # Poisson or Random
+  gen_veh_states_dir: "data/inference/rounD/simulation_initialization/gen_veh_states/rounD/"  # The states of generated vehicle at entrance during the simulation
+  check_safety_method: lane_based_safety_check  # lane_based_safety_check or uniform_safety_check
+  uniform_safety_buffer: 5
+  same_lane_safety_buffer: 8  # for lane based check
+  different_lane_safety_buffer: 5  # for lane based check
+  default_Poisson_arr_rate: 200
+  sim_resol: 0.4  # Should be consistent with Behavior modeling network output resolution
+  drivable_map_dir: *drivable_map_dir
+  map_height: *map_height
+  map_width: *map_width
+  entrance_map_dir: *entrance_map_dir

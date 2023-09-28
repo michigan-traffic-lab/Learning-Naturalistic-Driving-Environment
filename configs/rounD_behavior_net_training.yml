@@ -1,0 +1,20 @@
+# Training dataset
+dataset: "rounD"
+path_to_traj_data: "data/training/behavior_net/rounD/rounD-filtered-VRUs-no-trailer-local-heading-size-36-18"  # Trajectory data for training
+
+# Model settings
+model: transformer  # transformer or bn_mlp
+history_length: 5  # number of historical steps input to the model
+pred_length: 5  # number of predicted steps output by the model
+max_num_vehicles: 32  # maximum number of vehicles that can be handled by the model
+
+# Training settings
+batch_size: 32
+lr: 1.0e-4  # learning rate
+lr_decay_step_size: 300  # The number of training epochs to conduct lr decay. lr_scheduler.StepLR is used.
+lr_decay_gamma: 0.3  # lr_scheduler.StepLR is used.
+max_num_epochs: 2500  # maximum training epochs
+dataloader_num_workers: 8  # num_workers
+
+# Pre-trained safety mapping network
+safety_mapper_ckpt_dir: "data/training/behavior_net/AA_rdbt/safety_mapper_ckpt/safety_mapping_net.pt"

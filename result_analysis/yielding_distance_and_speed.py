@@ -31,7 +31,7 @@ def combine_dict(dict_list, nested_dict=False):
     return new_dict
 
 
-def analyze_yielding_dist_and_v_res(res_folder, output_folder, gt_folder, density=True, save_fig=False):
+def analyze_yielding_dist_and_v_res(res_folder, output_folder, gt_folder, density=True):
     output_yielding_conflict_dist_and_v_dict_list = []
     for subfolder in sorted(os.listdir(res_folder)):
         try:
@@ -40,6 +40,11 @@ def analyze_yielding_dist_and_v_res(res_folder, output_folder, gt_folder, densit
         except:
             pass
 
+    if len(output_yielding_conflict_dist_and_v_dict_list) == 0:
+        print("============== No yielding results found, check folder path and "
+              "whether gen_realistic_metric_flag is set to True in the config file"
+              "when running the simulation.")
+        return
     yielding_conflict_dist_and_v_dict = combine_dict(output_yielding_conflict_dist_and_v_dict_list, nested_dict=False)
     yield_dist_and_v_list, not_yield_dist_and_v_list = yielding_conflict_dist_and_v_dict['yield_dist_and_v_list'], yielding_conflict_dist_and_v_dict['not_yield_dist_and_v_list']
 
@@ -59,11 +64,11 @@ def analyze_yielding_dist_and_v_res(res_folder, output_folder, gt_folder, densit
         gt_yield_dist, gt_yield_v = np.array(gt_yield_dist_and_v_list)[:, 0].tolist(), np.array(gt_yield_dist_and_v_list)[:, 1].tolist()
         gt_yield_dist = [val for val in gt_yield_dist if val < 45]
 
-    plot_yield_dist_distribution(yield_dist, gt_yield_dist, output_folder, density=density, save_fig=save_fig)
-    plot_yield_speed_distribution(yield_v, gt_yield_v, output_folder, density=density, save_fig=save_fig)
+    plot_yield_dist_distribution(yield_dist, gt_yield_dist, output_folder, density=density)
+    plot_yield_speed_distribution(yield_v, gt_yield_v, output_folder, density=density)
 
 
-def plot_yield_dist_distribution(yield_dist, gt_yield_dist, output_folder, density=False, save_fig=False):
+def plot_yield_dist_distribution(yield_dist, gt_yield_dist, output_folder, density=False):
     plt.figure(figsize=(12, 12))
     fontsize = 40
     plt.rcParams['font.size'] = str(fontsize)
@@ -90,17 +95,14 @@ def plot_yield_dist_distribution(yield_dist, gt_yield_dist, output_folder, densi
     print(f"Yielding distance Hellinger distance: {H_dist}, KL divergence: {KL_div}")
 
     # Save figure with x, y axis label and ticks
-    if save_fig:
-        output_folder_with_label = os.path.join(output_folder, 'yielding_distance_and_speed')
-        os.makedirs(output_folder_with_label, exist_ok=True)
-        file_name = 'Y_dist_distribution_Hdis{0}_KL{1}'.format("%.3f" % round(H_dist, 3), "%.3f" % round(KL_div, 3))
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.svg'), bbox_inches='tight')
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.pdf'), bbox_inches='tight')
-        data.to_csv(os.path.join(output_folder_with_label, file_name + '.csv'), sep=",", index=False)
+    file_name = 'Y_dist_distribution_Hdis{0}_KL{1}'.format("%.3f" % round(H_dist, 3), "%.3f" % round(KL_div, 3))
+    plt.savefig(os.path.join(output_folder, file_name + '.png'), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(output_folder, file_name + '.svg'), bbox_inches='tight')
+    plt.savefig(os.path.join(output_folder, file_name + '.pdf'), bbox_inches='tight')
+    data.to_csv(os.path.join(output_folder, file_name + '.csv'), sep=",", index=False)
 
 
-def plot_yield_speed_distribution(yield_v, gt_yield_v, output_folder, density=False, save_fig=False):
+def plot_yield_speed_distribution(yield_v, gt_yield_v, output_folder, density=False):
     plt.figure(figsize=(12, 12))
     fontsize = 40
     plt.rcParams['font.size'] = str(fontsize)
@@ -126,14 +128,11 @@ def plot_yield_speed_distribution(yield_v, gt_yield_v, output_folder, density=Fa
     print(f"Yielding speed Hellinger distance: {H_dist}, KL divergence: {KL_div}")
 
     # Save figure with x, y axis label and ticks
-    if save_fig:
-        output_folder_with_label = os.path.join(output_folder, 'yielding_distance_and_speed')
-        os.makedirs(output_folder_with_label, exist_ok=True)
-        file_name = 'Y_v_distribution_Hdis{0}_KL{1}'.format("%.3f" % round(H_dist, 3), "%.3f" % round(KL_div, 3))
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.svg'), bbox_inches='tight')
-        plt.savefig(os.path.join(output_folder_with_label, file_name + '.pdf'), bbox_inches='tight')
-        data.to_csv(os.path.join(output_folder_with_label, file_name + '.csv'), sep=",", index=False)
+    file_name = 'Y_v_distribution_Hdis{0}_KL{1}'.format("%.3f" % round(H_dist, 3), "%.3f" % round(KL_div, 3))
+    plt.savefig(os.path.join(output_folder, file_name + '.png'), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(output_folder, file_name + '.svg'), bbox_inches='tight')
+    plt.savefig(os.path.join(output_folder, file_name + '.pdf'), bbox_inches='tight')
+    data.to_csv(os.path.join(output_folder, file_name + '.csv'), sep=",", index=False)
 
 
 # Quantify the difference of the distribution
@@ -163,13 +162,21 @@ def cal_KL_div(P, Q):
 
 
 if __name__ == '__main__':
+    # Simulation results. Change this to the folder of your results
+    location = 'AA_rdbt'  # 'AA_rdbt' or 'rounD'
+    experiment_name = f'{location}_paper_results'
+    res_folder = f'../data/paper-inference-results/{experiment_name}'
     # Ground-truth results
-    gt_folder = r'./raw_data/ground_truth/'
+    if location == "AA_rdbt":
+        gt_folder = r'../data/statistical-realism-ground-truth/AA_rdbt_ground_truth/'
+    elif location == 'rounD':
+        gt_folder = r'../data/statistical-realism-ground-truth/rounD_ground_truth/'
+    else:
+        raise NotImplementedError(
+            '{0} does not supported yet...Choose from ["AA_rdbt", "rounD"].'.format(location))
 
-    # Simulation results
-    res_folder = r'./raw_data/NeuralNDE/'
-    save_fig = True  # Whether save plotted figure
-    output_folder = os.path.join('plot')
+    output_folder = os.path.join(f'plot/{experiment_name}/yielding_distance_and_speed')
+    os.makedirs(output_folder, exist_ok=True)
 
     # Analyze the results and plot the figures
-    analyze_yielding_dist_and_v_res(res_folder, output_folder, gt_folder=gt_folder, density=True, save_fig=save_fig)
+    analyze_yielding_dist_and_v_res(res_folder, output_folder, gt_folder=gt_folder, density=True)
